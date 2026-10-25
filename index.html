@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TALA System Mock Defense Quiz</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#14243a;--mute:#5b6b80;--line:#d3dce6;--accent:#1f5fbf;--ok:#17794a;--okbg:#e2f4ea;--bad:#b3261e;--badbg:#fbe7e5}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1824;--card:#18263a;--ink:#e6edf6;--mute:#93a4ba;--line:#2d405a;--accent:#6aa3ff;--ok:#5fd394;--okbg:#17372a;--bad:#ff8a80;--badbg:#412220}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif;padding:24px 16px}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px}
+input[type=text]{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin:8px 0 16px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;padding:10px 20px}
+button.ghost{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.meta{color:var(--mute);font-size:.9rem;margin-bottom:6px}
+.q{font-size:1.1rem;font-weight:600;margin:0 0 16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);margin-bottom:10px;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt b{min-width:1.4em;color:var(--accent)}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{opacity:1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
+.score{font-size:2.6rem;font-weight:700;margin:4px 0}
+.status{font-size:.9rem;padding:10px 12px;border-radius:6px;margin:12px 0}
+.status.ok{background:var(--okbg);color:var(--ok)}.status.bad{background:var(--badbg);color:var(--bad)}.status.wait{background:var(--bg);color:var(--mute)}
+.rev{border-top:1px solid var(--line);padding:12px 0;font-size:.95rem}
+.rev .t{font-weight:600}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TALA System: Mock Defense Quiz</h1>
+  <p class="sub">10 hard questions. Choose the best answer for each.</p>
+
+  <div class="card" id="start">
+    <label for="name"><b>Your name</b></label>
+    <input type="text" id="name" maxlength="80" placeholder="Enter your full name" autocomplete="name">
+    <button id="go" disabled>Start quiz</button>
+  </div>
+
+  <div class="card hide" id="quiz">
+    <div class="bar"><i id="prog"></i></div>
+    <div class="meta" id="meta"></div>
+    <p class="q" id="qtext"></p>
+    <div id="opts"></div>
+    <div class="row"><span id="fb" class="meta"></span><button id="next" disabled>Next</button></div>
+  </div>
+
+  <div class="card hide" id="result">
+    <div class="meta" id="who"></div>
+    <div class="score" id="score"></div>
+    <div id="pct" class="meta"></div>
+    <div class="status wait" id="sendStatus">Sending results...</div>
+    <button class="ghost hide" id="retry">Retry sending</button>
+    <div id="review"></div>
+    <div class="row"><button id="again">Take it again</button></div>
+  </div>
+</div>
+
+<script>
+// Paste your Discord webhook URL between the quotes.
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1502541394185818162/TGFtL6UWNcrij1RJrVWp4OLc8rp2SMkb5XW5hDZeVIuICGlOhN0uGuvFBvtIMX6RUWxD";
+
+const Q = [
+ {q:"Why does TALA queue an SMS in the database instead of sending it inside the same operation that updates a request's lifecycle status?",o:["To let SMS delivery happen asynchronously, so a provider failure does not roll back the request update","To guarantee the recipient reads the message","To avoid storing notification history","To make SMS independent of student contact information"],a:0},
+ {q:"What is the main purpose of the UNIQUE constraint on (request_id, event_type) in the SMS outbox?",o:["To allow only one request per student","To prevent duplicate outbox entries for the same request event","To retry a failed message automatically","To ensure every request gets an SMS"],a:1},
+ {q:"TALA's worker selects due PENDING notifications using FOR UPDATE SKIP LOCKED. What problem does this primarily help avoid?",o:["Multiple workers processing the same locked notification concurrently","SMS messages exceeding the provider's character limit","Students submitting requests without a mobile number","PostgreSQL creating duplicate reference numbers"],a:0},
+ {q:"If SMS8 returns HTTP 200 with {\"success\": false, ...}, how should TALA interpret the result?",o:["As a successful delivery because the HTTP status is 200","As a provider-reported failure, allowing the outbox retry policy to apply","As proof the message was delivered but not read","As a database connection failure"],a:1},
+ {q:"Why does the system use a request-specific workflow snapshot when lifecycle processing starts?",o:["To keep the request's workflow steps consistent even if office workflow configuration changes later","To copy SMS credentials into each request","To prevent staff from changing request status","To assign a new student ID to the request"],a:0},
+ {q:"Before a request can become READY TO CLAIM, what condition must be met according to the system documentation?",o:["Every configured workflow step must be started in strict sequence","Every required workflow step must be completed or waived","The student must receive and reply to an SMS","The request must have exactly one document type"],a:1},
+ {q:"A notification is recorded as SKIPPED because SMS sending is disabled or configuration is missing. What does this say about the request itself?",o:["The request transaction must have failed","The request can still exist; SMS delivery is handled separately","The request was automatically rejected","The request must be resubmitted after SMS is enabled"],a:1},
+ {q:"Why does TALA store only a masked destination in the SMS administration screen?",o:["To reduce exposure of a student's full phone number in the interface","To make the SMS provider accept the number","To ensure retries use a different destination","To prevent the database from storing a phone number"],a:0},
+ {q:"What is the most accurate interpretation of an SMS notification marked SENT?",o:["The recipient definitely read the SMS","The provider accepted or confirmed the send according to the response TALA received; it does not prove the recipient read it","The phone successfully displayed the message","The student's request has been completed"],a:1},
+ {q:"If the admin application is closed, what is the likely effect on queued PENDING SMS notifications in this implementation?",o:["The SMS worker started by the admin application stops polling, so pending messages wait until a worker runs again","PostgreSQL sends them directly to students","The requests are deleted with the worker thread","The kiosk automatically starts the admin SMS worker"],a:0}
+];
+const L = ["A","B","C","D"];
+const $ = id => document.getElementById(id);
+let i = 0, answers = [], name = "", payload = null;
+
+$("name").addEventListener("input", e => $("go").disabled = !e.target.value.trim());
+$("name").addEventListener("keydown", e => { if (e.key === "Enter" && !$("go").disabled) $("go").click(); });
+$("go").onclick = () => { name = $("name").value.trim(); i = 0; answers = []; show("quiz"); render(); };
+$("next").onclick = () => { i++; i < Q.length ? render() : finish(); };
+$("again").onclick = () => { $("name").value = name; show("start"); };
+$("retry").onclick = () => send();
+
+function show(id){ ["start","quiz","result"].forEach(s => $(s).classList.toggle("hide", s !== id)); }
+
+function render(){
+  const q = Q[i];
+  $("meta").textContent = `Question ${i+1} of ${Q.length}`;
+  $("prog").style.width = (i / Q.length * 100) + "%";
+  $("qtext").textContent = q.q;
+  $("fb").textContent = "";
+  $("next").disabled = true;
+  $("next").textContent = i === Q.length - 1 ? "See results" : "Next";
+  const box = $("opts"); box.innerHTML = "";
+  q.o.forEach((t, k) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = `<b>${L[k]}.</b><span></span>`;
+    b.lastChild.textContent = t;
+    b.onclick = () => pick(k);
+    box.appendChild(b);
+  });
+}
+
+function pick(k){
+  const q = Q[i]; answers[i] = k;
+  [...$("opts").children].forEach((b, n) => {
+    b.disabled = true;
+    if (n === q.a) b.classList.add("ok");
+    else if (n === k) b.classList.add("bad");
+  });
+  $("fb").textContent = k === q.a ? "Correct." : `Incorrect. Correct answer: ${L[q.a]}.`;
+  $("next").disabled = false;
+  $("next").focus();
+}
+
+function finish(){
+  const score = answers.filter((a, n) => a === Q[n].a).length;
+  const pct = Math.round(score / Q.length * 100);
+  $("prog").style.width = "100%";
+  $("who").textContent = name;
+  $("score").textContent = `${score} / ${Q.length}`;
+  $("pct").textContent = `${pct}%`;
+  const rev = $("review"); rev.innerHTML = "";
+  Q.forEach((q, n) => {
+    const d = document.createElement("div"); d.className = "rev";
+    const right = answers[n] === q.a;
+    d.innerHTML = `<div class="t"></div><div></div>`;
+    d.firstChild.textContent = `${n+1}. ${right ? "Correct" : "Incorrect"}`;
+    d.firstChild.style.color = right ? "var(--ok)" : "var(--bad)";
+    d.lastChild.textContent = right
+      ? `Your answer: ${L[answers[n]]}`
+      : `Your answer: ${L[answers[n]]}. Correct: ${L[q.a]}. ${q.o[q.a]}`;
+    rev.appendChild(d);
+  });
+  payload = {
+    username: "TALA Quiz",
+    embeds: [{
+      title: "TALA Mock Defense Quiz Result",
+      color: pct >= 70 ? 0x17794a : 0xb3261e,
+      fields: [
+        {name: "Name", value: name, inline: true},
+        {name: "Score", value: `${score}/${Q.length} (${pct}%)`, inline: true},
+        {name: "Answers", value: Q.map((q, n) => `${n+1}. ${L[answers[n]]} ${answers[n] === q.a ? "✅" : "❌ (correct: " + L[q.a] + ")"}`).join("\n")}
+      ],
+      timestamp: new Date().toISOString()
+    }]
+  };
+  show("result");
+  send();
+}
+
+async function send(){
+  const s = $("sendStatus"), r = $("retry");
+  r.classList.add("hide");
+  s.className = "status wait"; s.textContent = "Sending results...";
+  if (!WEBHOOK_URL) {
+    s.className = "status bad";
+    s.textContent = "No webhook set. Add your Discord webhook URL to WEBHOOK_URL in the file.";
+    return;
+  }
+  try {
+    const res = await fetch(WEBHOOK_URL, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    s.className = "status ok"; s.textContent = "Results sent.";
+  } catch (e) {
+    s.className = "status bad"; s.textContent = "Could not send results (" + e.message + ").";
+    r.classList.remove("hide");
+  }
+}
+</script>
+</body>
+</html>
