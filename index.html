@@ -3,184 +3,430 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TALA System Mock Defense Quiz</title>
+<title>TALA: Registrar Document Request and Queue Management System</title>
 <style>
-:root{--bg:#eef2f6;--card:#fff;--ink:#14243a;--mute:#5b6b80;--line:#d3dce6;--accent:#1f5fbf;--ok:#17794a;--okbg:#e2f4ea;--bad:#b3261e;--badbg:#fbe7e5}
-@media(prefers-color-scheme:dark){:root{--bg:#0f1824;--card:#18263a;--ink:#e6edf6;--mute:#93a4ba;--line:#2d405a;--accent:#6aa3ff;--ok:#5fd394;--okbg:#17372a;--bad:#ff8a80;--badbg:#412220}}
+:root{--bg:#f6f8fb;--surface:#fff;--ink:#14213d;--muted:#566075;--line:#d5dce8;--accent:#1f4e8c;--accent2:#e8eef8;--code:#101a2e;--codeink:#dbe7ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1624;--surface:#172033;--ink:#e6ecf8;--muted:#9aa7c0;--line:#2a3652;--accent:#8db4ff;--accent2:#1d2a47;--code:#0a1020;--codeink:#cfe0ff}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif;padding:24px 16px}
-.wrap{max-width:720px;margin:0 auto}
-h1{font-size:1.5rem;margin:0 0 4px}
-.sub{color:var(--mute);margin:0 0 20px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px}
-input[type=text]{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin:8px 0 16px}
-button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;padding:10px 20px}
-button.ghost{background:transparent;color:var(--accent)}
-button:disabled{opacity:.45;cursor:not-allowed}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.bar{height:6px;background:var(--line);border-radius:3px;margin-bottom:18px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
-.meta{color:var(--mute);font-size:.9rem;margin-bottom:6px}
-.q{font-size:1.1rem;font-weight:600;margin:0 0 16px}
-.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);margin-bottom:10px;padding:12px 14px}
-.opt:hover:not(:disabled){border-color:var(--accent)}
-.opt b{min-width:1.4em;color:var(--accent)}
-.opt.ok{background:var(--okbg);border-color:var(--ok)}
-.opt.bad{background:var(--badbg);border-color:var(--bad)}
-.opt:disabled{opacity:1}
-.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
-.score{font-size:2.6rem;font-weight:700;margin:4px 0}
-.status{font-size:.9rem;padding:10px 12px;border-radius:6px;margin:12px 0}
-.status.ok{background:var(--okbg);color:var(--ok)}.status.bad{background:var(--badbg);color:var(--bad)}.status.wait{background:var(--bg);color:var(--mute)}
-.rev{border-top:1px solid var(--line);padding:12px 0;font-size:.95rem}
-.rev .t{font-weight:600}
-.hide{display:none}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 Georgia,"Times New Roman",serif}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);max-width:1080px;margin:0 auto;gap:40px;padding:0 20px}
+nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:28px 0;font:14px/1.9 system-ui,sans-serif}
+nav b{display:block;font-size:20px;color:var(--accent);margin-bottom:8px}
+nav a{display:block;color:var(--muted);text-decoration:none;border-left:2px solid var(--line);padding-left:12px}
+nav a:hover,nav a:focus-visible{color:var(--accent);border-color:var(--accent);outline:none}
+header{padding:48px 0 24px;border-bottom:3px solid var(--accent)}
+h1{font:700 clamp(26px,4vw,40px)/1.2 system-ui,sans-serif;margin:0 0 12px;color:var(--accent)}
+.team{font:14px system-ui,sans-serif;color:var(--muted);margin:0}
+h2{font:700 26px/1.3 system-ui,sans-serif;margin:48px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font:700 18px/1.4 system-ui,sans-serif;margin:28px 0 6px;color:var(--accent)}
+p{margin:8px 0}
+dl{margin:8px 0}dt{font:700 15px system-ui,sans-serif;margin-top:14px}dd{margin:2px 0 0 0;padding-left:16px;border-left:3px solid var(--accent2)}
+ul{padding-left:22px}li{margin:3px 0}
+pre{background:var(--code);color:var(--codeink);padding:14px 16px;border-radius:6px;overflow-x:auto;font:13px/1.5 ui-monospace,Consolas,monospace}
+code{font:0.9em ui-monospace,Consolas,monospace;background:var(--accent2);padding:1px 5px;border-radius:3px}
+pre code{background:none;padding:0}
+.note{background:var(--accent2);border-left:4px solid var(--accent);padding:10px 14px;margin:14px 0;font-family:system-ui,sans-serif;font-size:15px}
+details{border:1px solid var(--line);background:var(--surface);border-radius:6px;margin:8px 0;padding:0 14px}
+summary{cursor:pointer;font:600 15px system-ui,sans-serif;padding:10px 0}
+summary:focus-visible{outline:2px solid var(--accent)}
+details p{margin:0 0 12px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font:14px/1.5 system-ui,sans-serif;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--accent2)}
+footer{margin:48px 0;padding-top:14px;border-top:1px solid var(--line);font:13px system-ui,sans-serif;color:var(--muted)}
+@media(max-width:820px){.wrap{display:block}nav{position:static;max-height:none;padding-bottom:0}nav a{display:inline-block;border:0;padding:0 10px 0 0}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>TALA System: Mock Defense Quiz</h1>
-  <p class="sub">10 hard questions. Choose the best answer for each.</p>
+<nav aria-label="Sections">
+<b>TALA</b>
+<a href="#desc">Project description</a>
+<a href="#review">System review</a>
+<a href="#features">Features</a>
+<a href="#tech">Technical overview</a>
+<a href="#code">Code walkthrough</a>
+<a href="#rules">Business rules</a>
+<a href="#limits">Limitations</a>
+<a href="#qa">Review Q&amp;A</a>
+<a href="#glossary">Glossary</a>
+</nav>
+<main>
+<header>
+<h1>TALA: Registrar Document Request and Queue Management System</h1>
+<p class="team">BSIT 01 – BLK # <br>[Surname, First Name, MI.] · [Surname, First Name, MI.] · [Surname, First Name, MI.] · [Surname, First Name, MI.] · [Surname, First Name, MI.]</p>
+</header>
 
-  <div class="card" id="start">
-    <label for="name"><b>Your name</b></label>
-    <input type="text" id="name" maxlength="80" placeholder="Enter your full name" autocomplete="name">
-    <button id="go" disabled>Start quiz</button>
-  </div>
+<section id="desc">
+<h2>Project Description</h2>
+<p>TALA is a desktop registrar document-request and counter-queue application intended for students, Registrar Staff, Office Staff, and administrators. Students use a self-service kiosk to look up student information, request registrar documents, receive a queue ticket, and check request progress using a reference number. Staff manage the counter queue and process document requests through office-specific workflows. Administrators configure the system, staff accounts, offices, reports, workflows, and data backups. A separate serving display presents counter activity to people in the service area.</p>
+<p>The system uses PostgreSQL to store requests, queue tickets, lifecycle information, workflow configurations, accounts, notifications, and audit records. TALA can send status messages through an external SMS provider. The student lookup API and SMS delivery provider are external dependencies; their availability and data are not guaranteed by the application alone.</p>
+</section>
 
-  <div class="card hide" id="quiz">
-    <div class="bar"><i id="prog"></i></div>
-    <div class="meta" id="meta"></div>
-    <p class="q" id="qtext"></p>
-    <div id="opts"></div>
-    <div class="row"><span id="fb" class="meta"></span><button id="next" disabled>Next</button></div>
-  </div>
+<section id="review">
+<h2>System Review</h2>
+<h3>1. System Purpose</h3>
+<ul>
+<li>Give students a consistent way to request documents and track progress.</li>
+<li>Organize in-person service using numbered queue tickets and counters.</li>
+<li>Allow authorized staff to manage requests and their office processing.</li>
+<li>Provide status visibility without exposing internal staff notes.</li>
+<li>Keep records of queue actions, lifecycle changes, and notifications.</li>
+</ul>
 
-  <div class="card hide" id="result">
-    <div class="meta" id="who"></div>
-    <div class="score" id="score"></div>
-    <div id="pct" class="meta"></div>
-    <div class="status wait" id="sendStatus">Sending results...</div>
-    <button class="ghost hide" id="retry">Retry sending</button>
-    <div id="review"></div>
-    <div class="row"><button id="again">Take it again</button></div>
-  </div>
+<h3>2. Target Users and Roles</h3>
+<dl>
+<dt>Students</dt><dd>Look up their student information, select requested documents and request details, receive a queue/reference number, and check request status using the reference number.</dd>
+<dt>Registrar Staff</dt><dd>Handle counter queue tickets and Registrar's Office workflow steps. The service layer restricts Registrar Staff step updates to steps assigned to the Registrar's Office.</dd>
+<dt>Office Staff</dt><dd>Work on workflow steps assigned to their office. The service layer restricts an Office Staff account linked to an office to that office's steps.</dd>
+<dt>Admin</dt><dd>Has administrative privileges for staff account creation, workflow and office configuration, lifecycle administration, reporting, backups, and other admin tools.</dd>
+<dt>Public Display Viewers</dt><dd>See which tickets are being served, which are waiting, and recently completed tickets. This display is not an account role.</dd>
+</dl>
+<p>The database recognizes Admin, Registrar Staff, and Office Staff roles. The visible dashboard has separate Admin-only controls; service-level office permissions also apply when staff update workflow steps.</p>
+
+<h3>3. System Entry Points</h3>
+<div class="tw"><table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>main.py</code></td><td>Student kiosk for Student ID lookup, document requests, confirmation, and public progress tracking.</td></tr>
+<tr><td><code>admin.py</code></td><td>Staff login, queue dashboard, and administrative/lifecycle tools.</td></tr>
+<tr><td><code>serving.py</code></td><td>Public "Now Serving" counter display.</td></tr>
+<tr><td><code>run_all.bat</code></td><td>Launcher intended to start all three entry points.</td></tr>
+</table></div>
+
+<h3>4. General Request Journey</h3>
+<ol>
+<li>Student enters a Student ID in the kiosk.</li>
+<li>Kiosk calls the configured student API and presents the returned student information for confirmation.</li>
+<li>Student selects one or more documents, a purpose, and a format.</li>
+<li>The application validates the document selection and submits the request to PostgreSQL.</li>
+<li>The database service creates a request, permanent reference number, request-document rows, and a queue ticket.</li>
+<li>The kiosk displays a confirmation with the queue number and reference number.</li>
+<li>Staff call and process the queue ticket at a counter.</li>
+<li>Completion of the initial queue transaction starts the separate document-processing lifecycle and creates its workflow snapshot.</li>
+<li>Authorized office staff update workflow steps and request status.</li>
+<li>Student uses the reference number to check public progress. SMS notifications may also be queued for configured status events.</li>
+<li>After all required office steps are complete or waived, staff can mark the request ready to claim, then claimed once the documents are released.</li>
+</ol>
+<div class="note"><b>Important distinction:</b> completing the counter ticket is not the same as completing or claiming the requested documents. Queue processing and document lifecycle processing are separate workflows.</div>
+</section>
+
+<section id="features">
+<h2>Features</h2>
+
+<h3>1. Student Kiosk</h3>
+<dl>
+<dt>Student ID Lookup</dt><dd>Type an ID or use the on-screen keypad. The ID is sent to the API configured in <code>services/studentApi.py</code>. A 404 is treated as not found; other unsuccessful HTTP responses, connection failures, and invalid responses are presented as errors. The URL points to localhost; the API server and mock dataset are not in this repository.</dd>
+<dt>Student Confirmation</dt><dd>The kiosk displays the returned student information so the student can confirm identity.</dd>
+<dt>Document Selection</dt><dd>One or more of: Transcript of Records, Certificate of Enrollment, Certificate of Grades, Certificate of Good Moral, Honorable Dismissal, Authentication / Certification, Other Registrar Request. Each selection is stored as its own <code>request_documents</code> record.</dd>
+<dt>Request Details</dt><dd>Purpose: Employment, Scholarship, Transfer, Internship / OJT, Personal Use, Government Requirement, School Requirement, Other. Format: Printed Copy, Digital Copy, Printed + Digital Copy. Purpose and additional information are stored on the request; document type and format are stored per document.</dd>
+<dt>Submission Validation</dt><dd>The kiosk checks for a Student ID and at least one document. The database service independently rejects empty selections and removes duplicates. Purpose and format are not enforced as required by the database service.</dd>
+<dt>Request Confirmation</dt><dd>Shows the queue number, reference number, and document selection.</dd>
+</dl>
+
+<h3>2. Queue Management</h3>
+<dl>
+<dt>Queue Overview</dt><dd>The dashboard lists queue number, student ID/name, document, counter, status, and queued time, with summary cards (pending, at counters, completed today, total today). Staff can search, filter, refresh, or use five-second auto-refresh.</dd>
+<dt>Calling and Serving</dt><dd>Staff call the next waiting ticket or serve a selected one. The next-ticket query orders by queue position and uses row locking with <code>SKIP LOCKED</code> so two actions cannot claim the same row.</dd>
+<dt>Ticket Actions</dt><dd>Complete, cancel / no-show, transfer to a counter, skip, and recall a skipped ticket. Completed queue transactions cannot be changed through the normal update.</dd>
+<dt>Timing and Reporting</dt><dd>Timing data supports wait and service reports. Admins can run date-range reports and export CSV.</dd>
+<dt>Live Updates and Serving Display</dt><dd>PostgreSQL queue changes publish notifications to the real-time listener. The serving display shows tickets by counter, upcoming tickets, and recently completed ones, with auto-refresh, clock, fullscreen, and optional call chime.</dd>
+</dl>
+
+<h3>3. Document Request Lifecycle</h3>
+<dl>
+<dt>Lifecycle Activation</dt><dd>When the queue transaction is completed, the application starts lifecycle tracking, snapshots the current workflow for the document, and queues an acceptance notification. A queue cancellation is separate from office-processing status.</dd>
+</dl>
+<div class="tw"><table>
+<tr><th>Overall status</th><th>Meaning</th></tr>
+<tr><td>REQUESTED</td><td>Accepted for processing after lifecycle activation.</td></tr>
+<tr><td>UNDER_PROCESSING</td><td>Processing is underway at one or more offices.</td></tr>
+<tr><td>NEEDS_ACTION</td><td>Staff need an action or information; a reason is required.</td></tr>
+<tr><td>READY_TO_CLAIM</td><td>All required office steps are completed or waived.</td></tr>
+<tr><td>CLAIMED</td><td>Document released. Normally set only from READY_TO_CLAIM.</td></tr>
+<tr><td>REJECTED</td><td>Request rejected; a reason is required.</td></tr>
+<tr><td>CANCELLED</td><td>Request cancelled; a reason is required.</td></tr>
+</table></div>
+<dl>
+<dt>Validated Transitions</dt><dd>The document service controls legal transitions. Changes are unavailable until lifecycle tracking has started and the initial queue transaction is completed. Required steps are checked before READY_TO_CLAIM. Terminal states are not freely editable; reopening is an audited admin operation.</dd>
+<dt>Office Workflow Configuration</dt><dd>Admins configure versioned workflows per document type. Each has ordered steps with an office, step name, and required/optional flag. Saving creates a new version. Existing requests keep the snapshot taken when their lifecycle started.</dd>
+<dt>Request-Specific Tracking</dt><dd>With no configured workflow, the system does not invent steps; authorized staff may add request-specific steps.</dd>
+<dt>Step Management</dt><dd>Staff can start, complete, hold, resume, waive, unwaive, reset, or remove steps, depending on permissions and status. Steps may be started out of order; what matters is that all required steps are completed or waived.</dd>
+<dt>Office Location</dt><dd>Tracked independently from step status. Staff may set or clear a location and add a note; progress can update it to the active or next pending office. It is cleared when the request is claimed.</dd>
+<dt>Public and Internal Information</dt><dd>Steps keep public remarks separate from internal notes. Public tracking does not expose internal notes or staff identities.</dd>
+</dl>
+
+<h3>4. Public Progress Tracking</h3>
+<dl>
+<dt>Reference Lookup</dt><dd>Reference numbers are normalized to uppercase. Unknown or invalid references get a generic not-found message.</dd>
+<dt>Information Shown</dt><dd>Depending on state: reference, queue number/status, documents, overall status, timestamps, estimated completion, current office and step, public remarks, status reason for selected states, and claiming instructions when ready.</dd>
+<dt>Rate Limiting</dt><dd>Lookups are throttled by a configurable limit and window. The limiter is in-process, so counters are local to that running process.</dd>
+</dl>
+
+<h3>5. Staff Accounts and Audit</h3>
+<dl>
+<dt>Authentication</dt><dd>Credentials are checked against bcrypt password hashes. Inactive accounts are rejected. Successful logins can be audited.</dd>
+<dt>Roles and Permissions</dt><dd>Admin, Registrar Staff, and Office Staff. Registrar Staff are limited to Registrar steps; Office Staff to their linked office's steps.</dd>
+<dt>Account Creation</dt><dd>Admin can create Registrar Staff accounts. Username length is validated, passwords need at least eight characters and are hashed before storage.</dd>
+<dt>Audit Log</dt><dd>Records administrative and operational events; Admins can inspect recent activity.</dd>
+</dl>
+
+<h3>6. SMS Notifications</h3>
+<dl>
+<dt>Events</dt><dd>Acceptance, under processing, step completion, needs action, ready to claim, cancellation, rejection, claimed/released, and office transfer, depending on the lifecycle operation.</dd>
+<dt>Outbox and Delivery</dt><dd>Notification rows live in PostgreSQL. A background worker polls due rows and talks to SMS8. Delivery is asynchronous, so SMS failure never rolls back a lifecycle update.</dd>
+<dt>Retries and Duplicates</dt><dd>Bounded exponential backoff up to the configured maximum. A database constraint prevents duplicates per request and event type. Staff can review status and errors and retry failures.</dd>
+<dt>Preferences and Disabled Service</dt><dd>Event types can be enabled or disabled. If SMS is disabled or configuration is missing, messages are recorded as skipped.</dd>
+</dl>
+
+<h3>7. Database and Data Model</h3>
+<div class="tw"><table>
+<tr><th>Table</th><th>Holds</th></tr>
+<tr><td>students</td><td>Student IDs and locally stored contact/program details.</td></tr>
+<tr><td>requests</td><td>Request type, purpose, additional info, reference number, lifecycle status, timestamps, current office.</td></tr>
+<tr><td>request_documents</td><td>One row per selected document type and format.</td></tr>
+<tr><td>queue</td><td>Ticket number, status, counter, and timing columns.</td></tr>
+<tr><td>counters</td><td>Counter names and active state.</td></tr>
+<tr><td>admins</td><td>Usernames, password hashes, role, active state, optional office.</td></tr>
+<tr><td>offices</td><td>Codes, names, active state, display order.</td></tr>
+<tr><td>document_workflows, workflow_steps</td><td>Versioned workflow definitions and ordered steps.</td></tr>
+<tr><td>request_tracking_steps</td><td>Per-request snapshot and runtime step status, remarks, notes, waivers.</td></tr>
+<tr><td>request_status_history</td><td>Status changes, reasons, timestamps, actors.</td></tr>
+<tr><td>sms_notifications, notification_preferences</td><td>Outbound messages, retry state, per-event settings.</td></tr>
+<tr><td>audit_logs, system_settings</td><td>Activity records and configurable values.</td></tr>
+</table></div>
+<p>Schema setup is idempotent and runs at startup. It creates or updates tables and columns, seeds counters, offices, and settings, and backfills certain historical records.</p>
+
+<h3>8. Identifier and Queue Number Rules</h3>
+<dl>
+<dt>Permanent Reference Number</dt><dd>Generated on the backend from a PostgreSQL sequence: configurable prefix, two-digit year, department code, and a sequence value padded to at least five digits. Concurrency-safe; values are not reused.</dd>
+<dt>Queue Number</dt><dd><code>Q-</code> plus an increment based on the largest number created on the database's current date. LPAD width is three, so numbers above 999 are not safely supported, and the max-plus-one query is not protected against simultaneous submissions.</dd>
+</dl>
+</section>
+
+<section id="tech">
+<h2>Technical Overview</h2>
+<h3>1. Application Structure</h3>
+<ul>
+<li><b>Views:</b> Tkinter screens for kiosk, dashboard, lifecycle, login, and serving display.</li>
+<li><b>Controllers:</b> connect user actions to screens and coordinate flow.</li>
+<li><b>Services:</b> database access, authentication, lifecycle, tracking, SMS, reference numbers, and real-time notifications.</li>
+<li><b>Models:</b> student, request, queue, and administrator data.</li>
+<li><b>Database:</b> schema and migration/seed SQL in <code>database.sql</code>.</li>
+</ul>
+<h3>2. Main Dependencies</h3>
+<ul>
+<li>Python 3.13 or newer (per README)</li>
+<li>PostgreSQL and psycopg2-binary</li>
+<li>Tkinter (desktop GUI)</li>
+<li>bcrypt (password hashing)</li>
+<li>requests (student API and SMS provider)</li>
+<li>Pillow (image assets)</li>
+<li>External services: student lookup API and SMS8</li>
+</ul>
+<h3>3. Configuration</h3>
+<p>Read from environment variables in <code>system/config.py</code>: database connection, SMS enablement and timeouts, worker interval and retry limit, reference prefix/department code, and public tracking rate/window. A <code>.env</code> file is not loaded automatically. Set configuration in the environment and keep credentials out of shared documents and source control.</p>
+</section>
+
+<section id="code">
+<h2>Programming and Code Walkthrough</h2>
+<p>Shortened excerpts of implementation patterns; not complete standalone files.</p>
+
+<h3>1. Program Startup</h3>
+<pre><code>from system.config import Config
+from controllers.kioskController import KioskController
+import tkinter as tk
+
+def main():
+    Config.validate()
+    root = tk.Tk()
+    app = KioskController(root)
+    app.start()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()</code></pre>
+<p><code>Config.validate()</code> checks required settings, <code>tk.Tk()</code> creates the window, the controller manages screens, and <code>mainloop()</code> handles events. The <code>__name__</code> guard stops <code>main()</code> from running on import. <code>admin.py</code> creates AdminController, <code>main.py</code> KioskController, <code>serving.py</code> ServingController.</p>
+
+<h3>2. MVC Structure</h3>
+<p>Models (Student, Request, Queue) carry data; views under <code>views/</code> draw screens; controllers switch screens and wire callbacks; services hold queries, validation, authentication, workflow rules, API calls, tracking, SMS, and real-time updates. This keeps SQL and business rules out of widgets.</p>
+
+<h3>3. Student API</h3>
+<pre><code>response = requests.get(f"{cls.BASE_URL}{student_id}", timeout=timeout)
+if response.status_code == 404:
+    raise LookupError("Student ID was not found.")
+response.raise_for_status()
+return response.json()</code></pre>
+<p>Callers handle <code>LookupError</code> (not found), <code>requests.RequestException</code> (HTTP/network), and <code>ValueError</code>/<code>TypeError</code> (bad payload). <code>BASE_URL</code> is fixed to localhost and no server is included.</p>
+
+<h3>4. Request Form to Database</h3>
+<pre><code>data = {"student_id": student_id, "student": self.student,
+        "document_types": document_types,
+        "purpose": self.purpose.get(),
+        "format": self.document_format.get(),
+        "additional_info": ""}
+result = self.db.create_request_and_queue(data)</code></pre>
+<p>The result contains request_id, queue_id, queue_number, reference_number, and document_types. The submit button is disabled during the call and restored on error.</p>
+
+<h3>5. Validation and SQL Writes</h3>
+<pre><code>document_types = list(dict.fromkeys(
+    t.strip() for t in document_types
+    if isinstance(t, str) and t.strip()))
+if not document_types:
+    raise ValueError("Select at least one document to request.")
+
+connection = self.connection_pool.getconn()
+try:
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO ... VALUES (%s, %s)", (a, b))
+finally:
+    self.connection_pool.putconn(connection)</code></pre>
+<p><code>with connection</code> commits on success and rolls back on exception; <code>finally</code> returns the connection to the pool; <code>%s</code> parameters keep data separate from SQL. One transaction: upsert student, generate reference, insert request, insert document rows, insert WAITING queue row, return identifiers.</p>
+
+<h3>6. SQL Concepts</h3>
+<p>Primary keys, foreign keys (<code>ON DELETE CASCADE</code>), UNIQUE constraints, <code>ON CONFLICT</code> insert-or-update, <code>RETURNING</code>, indexes, and transactions.</p>
+
+<h3>7. Reference Number Generation</h3>
+<pre><code>cursor.execute("SELECT nextval('request_reference_seq')")
+sequence_value = cursor.fetchone()[0]
+return f"{prefix}{year}{dept}{str(sequence_value).zfill(5)}"</code></pre>
+<p>The sequence is concurrency-safe. The queue number uses <code>COALESCE(MAX(CAST(SUBSTRING(queue_number FROM 3) AS INTEGER)), 0) + 1</code>, which is not atomic: two concurrent transactions can read the same maximum.</p>
+
+<h3>8. Authentication</h3>
+<pre><code>password_hash = bcrypt.hashpw(
+    password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")</code></pre>
+<p>Login uses <code>bcrypt.checkpw()</code>, checks the account is active, and audits success. A hash is not reversible encryption.</p>
+
+<h3>9. Lifecycle State Logic</h3>
+<pre><code>SELECT COUNT(*),
+       COUNT(*) FILTER (WHERE is_required = TRUE
+                          AND is_waived = FALSE
+                          AND status &lt;&gt; 'COMPLETED')
+FROM request_tracking_steps WHERE request_id = %s</code></pre>
+<p>Ready only when at least one step exists and zero required, non-waived steps are incomplete. <code>queue.status</code> (WAITING, SERVING, COMPLETED) and <code>requests.overall_status</code> are different data.</p>
+
+<h3>10. SQL Safety and Permissions</h3>
+<p>Always use placeholders, never string concatenation. DocumentService checks office permissions before updating a step: Admin all offices, Registrar Staff Registrar steps, Office Staff their linked office.</p>
+
+<h3>11. Threads and Tkinter</h3>
+<pre><code>def run_lookup():
+    result = service.lookup(reference)
+    self.after(0, lambda: self._render(result))
+threading.Thread(target=run_lookup, daemon=True).start()</code></pre>
+<p>Slow work runs in a background thread; <code>after(0, ...)</code> queues the UI update on the event loop.</p>
+
+<h3>12. LISTEN / NOTIFY</h3>
+<p>A trigger publishes on the <code>queue_updates</code> channel after queue inserts, updates, and deletes. RealtimeService runs <code>LISTEN queue_updates</code>, parses the JSON payload, and calls subscribers, which then fetch current queue data.</p>
+
+<h3>13. SMS Outbox</h3>
+<p>Lifecycle code inserts the notification inside its transaction. SmsService's worker later sends to SMS8 and records sent, failed, or skipped. A remote outage cannot undo a valid update.</p>
+
+<h3>14. File Map</h3>
+<div class="tw"><table>
+<tr><th>Path</th><th>Role</th></tr>
+<tr><td>main.py, admin.py, serving.py</td><td>Entry points and window setup</td></tr>
+<tr><td>controllers/</td><td>kioskController, adminController, servingController</td></tr>
+<tr><td>views/kiosk, admin, serving</td><td>Kiosk, staff, and public display screens</td></tr>
+<tr><td>services/databaseService.py</td><td>Queue and request persistence, reports, backup</td></tr>
+<tr><td>services/documentService.py</td><td>Lifecycle rules, workflows, permissions, steps</td></tr>
+<tr><td>services/trackingService.py</td><td>Student-safe lookup and rate limiting</td></tr>
+<tr><td>services/studentApi.py, referenceService.py, authService.py, smsService.py, realtimeService.py</td><td>API client, reference numbers, auth, SMS, LISTEN/NOTIFY</td></tr>
+<tr><td>models/, database.sql</td><td>Data structures; tables, triggers, migrations, seeds</td></tr>
+</table></div>
+
+<h3>15. Running for Development</h3>
+<ol>
+<li>Install Python and packages from <code>README.md</code> and <code>requirements.txt</code>.</li>
+<li>Set <code>DATABASE_URL</code> to a PostgreSQL database.</li>
+<li>Configure SMS only if outbound notifications are intended.</li>
+<li>Start PostgreSQL and the separate student API.</li>
+<li>Run <code>python main.py</code>, <code>python admin.py</code>, or <code>python serving.py</code>; or <code>run_all.bat</code> on Windows.</li>
+</ol>
+
+<h3>16. Programming Concepts Demonstrated</h3>
+<p>Object-oriented design, encapsulation, exceptions, collections, comprehensions, SQL parameter binding, transactions, threads and event loops, HTTP/JSON, relational modeling, event-driven updates, and the retry/outbox pattern.</p>
+</section>
+
+<section id="rules">
+<h2>Business Rules to Remember</h2>
+<ul>
+<li>A request may contain multiple document selections, stored as separate rows.</li>
+<li>At least one valid document type is mandatory at the database service.</li>
+<li>The queue ticket is for in-person service; the reference number is for persistent identification and progress lookup.</li>
+<li>Completing the queue transaction starts lifecycle processing; it does not mean the document is ready or claimed.</li>
+<li>All required office steps must be completed or waived before READY_TO_CLAIM.</li>
+<li>Only READY_TO_CLAIM requests can become CLAIMED normally.</li>
+<li>Public tracking shows safe details, not staff-only notes.</li>
+<li>SMS delivery is asynchronous and may fail independently.</li>
+<li>A missing workflow is not replaced; staff may add request-specific steps.</li>
+</ul>
+<h3>Non-Functional Characteristics</h3>
+<p><b>Integrity:</b> foreign keys and transactions. <b>Access control:</b> hashed passwords, role and office checks. <b>Reliability:</b> repeatable setup, outbox, bounded retries. <b>Usability:</b> guided kiosk, staff search and reports, public display. <b>Responsiveness:</b> LISTEN/NOTIFY and background threads. <b>Limitations:</b> depends on PostgreSQL, the localhost student API, and SMS provider availability.</p>
+</section>
+
+<section id="limits">
+<h2>Known Limitations and Points for Improvement</h2>
+<ul>
+<li>The student API and its mock dataset are not part of this repository.</li>
+<li>The form always sends an empty <code>additional_info</code>.</li>
+<li>The database service does not require purpose or format.</li>
+<li>Queue numbers can exceed three-digit padding and race under simultaneous submissions.</li>
+<li>The rate-limit state is in memory and not shared across processes.</li>
+<li>SMS depends on an external provider and may be skipped, delayed, or fail.</li>
+<li>Availability and records depend on the database, configuration, permissions, and external services.</li>
+</ul>
+</section>
+
+<section id="qa">
+<h2>Review Questions and Suggested Answers</h2>
+<details><summary>Q1. What is TALA?</summary><p>A desktop registrar document-request and counter-queue system. Students submit and track requests; staff manage queue service and office processing; administrators manage configuration and oversight.</p></details>
+<details><summary>Q2. Who are the system's users?</summary><p>Students, Registrar Staff, Office Staff, and Admin. The serving display is a public view, not a role.</p></details>
+<details><summary>Q3. Queue number vs. reference number?</summary><p>The queue number (<code>Q-</code> prefix) identifies a ticket in the day's in-person queue. The reference number identifies a request for later tracking and comes from a PostgreSQL sequence.</p></details>
+<details><summary>Q4. What happens when a student enters a Student ID?</summary><p>The kiosk calls the student API. Not-found is handled as a lookup error; other HTTP, connection, or response problems are shown to the student.</p></details>
+<details><summary>Q5. How are multiple documents stored?</summary><p>The request is in <code>requests</code>; each document and format is a row in <code>request_documents</code>.</p></details>
+<details><summary>Q6. What validation happens before creation?</summary><p>The UI requires a Student ID and one document. The database service filters empty and duplicate types and rejects an empty result.</p></details>
+<details><summary>Q7. What does completing a queue ticket mean?</summary><p>It completes the counter transaction and starts lifecycle tracking, not office processing or readiness for pickup.</p></details>
+<details><summary>Q8. When can a request become ready to claim?</summary><p>After lifecycle processing has started and every required step is complete or waived.</p></details>
+<details><summary>Q9. Can staff claim directly from processing?</summary><p>No. The normal transition requires READY_TO_CLAIM first.</p></details>
+<details><summary>Q10. How are workflows applied?</summary><p>Admins configure versioned workflows by document type. At lifecycle start the current workflow is copied as a snapshot, and later changes do not alter it.</p></details>
+<details><summary>Q11. What if no workflow is configured?</summary><p>No steps are invented; staff add request-specific steps.</p></details>
+<details><summary>Q12. What can students see when tracking?</summary><p>Public-safe request, queue, status, office, step, timing, and public-remark details. Internal notes and staff identities are excluded.</p></details>
+<details><summary>Q13. How does SMS failure affect a request?</summary><p>It is recorded and may be retried, but never rolls back the request or lifecycle transaction.</p></details>
+<details><summary>Q14. What protects staff accounts?</summary><p>bcrypt hashes, rejection of inactive accounts, and role and office checks.</p></details>
+<details><summary>Q15. What is the queue numbering limitation?</summary><p>It uses a daily max-plus-one with three-character padding, so numbers above 999 are unsafe and concurrent submissions can race.</p></details>
+<details><summary>Q16. Which external services does TALA need?</summary><p>The student lookup API and SMS8, plus PostgreSQL for persistence.</p></details>
+<details><summary>Q17. What are the three entry points?</summary><p><code>main.py</code> (kiosk), <code>admin.py</code> (staff dashboard), <code>serving.py</code> (Now Serving display).</p></details>
+<details><summary>Q18. What does <code>if __name__ == "__main__":</code> do?</summary><p>It runs the entry function only when the file is executed directly, not imported.</p></details>
+<details><summary>Q19. Why use <code>%s</code> placeholders?</summary><p>They bind values separately from SQL text, preventing injection and handling escaping.</p></details>
+<details><summary>Q20. Why a transaction for request creation?</summary><p>The student, request, document, reference, and queue writes are one logical operation; failure rolls back partial changes.</p></details>
+<details><summary>Q21. What does <code>finally</code> guarantee?</summary><p>The borrowed connection is returned to the pool whether the operation succeeds or fails.</p></details>
+<details><summary>Q22. Why bcrypt?</summary><p>It stores a salted hash; login verifies against it without storing the original password.</p></details>
+<details><summary>Q23. Why use <code>after()</code>?</summary><p>It schedules UI work on Tkinter's event loop instead of touching widgets from a worker thread.</p></details>
+<details><summary>Q24. Purpose of LISTEN/NOTIFY?</summary><p>The database signals queue changes; the listener prompts the UI to refresh.</p></details>
+<details><summary>Q25. What is the outbox pattern for?</summary><p>Committing a notification with the business change, then sending it asynchronously so provider failure does not undo the change.</p></details>
+<details><summary>Q26. Which reference component is concurrency-safe?</summary><p>The permanent reference (sequence). The daily <code>Q-</code> number is max-plus-one and is not.</p></details>
+</section>
+
+<section id="glossary">
+<h2>Glossary</h2>
+<dl>
+<dt>Queue Ticket</dt><dd>Number organizing a student's place in the in-person queue.</dd>
+<dt>Reference Number</dt><dd>Persistent request identifier for progress lookup.</dd>
+<dt>Request Document</dt><dd>One selected document type with its own format.</dd>
+<dt>Lifecycle</dt><dd>Office processing after the initial queue transaction.</dd>
+<dt>Workflow</dt><dd>Configured office steps that guide and record processing.</dd>
+<dt>Workflow Snapshot</dt><dd>Workflow copy saved to a request when lifecycle tracking starts.</dd>
+<dt>Required Step</dt><dd>A step to be completed or waived before READY_TO_CLAIM.</dd>
+<dt>Outbox</dt><dd>Database-backed list of notifications awaiting delivery or recording results.</dd>
+<dt>Audit Log</dt><dd>History of selected administrative and operational actions.</dd>
+</dl>
+<h3>Wireframe</h3>
+<p>The project includes Draw.io wireframes for the kiosk home and Student ID screens, student confirmation, document request, ticket success and tracking, staff login and dashboard, ticket details, account creation, audit log, queue report, backup and restore, serving display, and queue action menus.</p>
+</section>
+<footer>TALA documentation · BSIT 01</footer>
+</main>
 </div>
-
-<script>
-// Paste your Discord webhook URL between the quotes.
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1502541394185818162/TGFtL6UWNcrij1RJrVWp4OLc8rp2SMkb5XW5hDZeVIuICGlOhN0uGuvFBvtIMX6RUWxD";
-
-const Q = [
- {q:"Why does TALA queue an SMS in the database instead of sending it inside the same operation that updates a request's lifecycle status?",o:["To let SMS delivery happen asynchronously, so a provider failure does not roll back the request update","To guarantee the recipient reads the message","To avoid storing notification history","To make SMS independent of student contact information"],a:0},
- {q:"What is the main purpose of the UNIQUE constraint on (request_id, event_type) in the SMS outbox?",o:["To allow only one request per student","To prevent duplicate outbox entries for the same request event","To retry a failed message automatically","To ensure every request gets an SMS"],a:1},
- {q:"TALA's worker selects due PENDING notifications using FOR UPDATE SKIP LOCKED. What problem does this primarily help avoid?",o:["Multiple workers processing the same locked notification concurrently","SMS messages exceeding the provider's character limit","Students submitting requests without a mobile number","PostgreSQL creating duplicate reference numbers"],a:0},
- {q:"If SMS8 returns HTTP 200 with {\"success\": false, ...}, how should TALA interpret the result?",o:["As a successful delivery because the HTTP status is 200","As a provider-reported failure, allowing the outbox retry policy to apply","As proof the message was delivered but not read","As a database connection failure"],a:1},
- {q:"Why does the system use a request-specific workflow snapshot when lifecycle processing starts?",o:["To keep the request's workflow steps consistent even if office workflow configuration changes later","To copy SMS credentials into each request","To prevent staff from changing request status","To assign a new student ID to the request"],a:0},
- {q:"Before a request can become READY TO CLAIM, what condition must be met according to the system documentation?",o:["Every configured workflow step must be started in strict sequence","Every required workflow step must be completed or waived","The student must receive and reply to an SMS","The request must have exactly one document type"],a:1},
- {q:"A notification is recorded as SKIPPED because SMS sending is disabled or configuration is missing. What does this say about the request itself?",o:["The request transaction must have failed","The request can still exist; SMS delivery is handled separately","The request was automatically rejected","The request must be resubmitted after SMS is enabled"],a:1},
- {q:"Why does TALA store only a masked destination in the SMS administration screen?",o:["To reduce exposure of a student's full phone number in the interface","To make the SMS provider accept the number","To ensure retries use a different destination","To prevent the database from storing a phone number"],a:0},
- {q:"What is the most accurate interpretation of an SMS notification marked SENT?",o:["The recipient definitely read the SMS","The provider accepted or confirmed the send according to the response TALA received; it does not prove the recipient read it","The phone successfully displayed the message","The student's request has been completed"],a:1},
- {q:"If the admin application is closed, what is the likely effect on queued PENDING SMS notifications in this implementation?",o:["The SMS worker started by the admin application stops polling, so pending messages wait until a worker runs again","PostgreSQL sends them directly to students","The requests are deleted with the worker thread","The kiosk automatically starts the admin SMS worker"],a:0}
-];
-const L = ["A","B","C","D"];
-const $ = id => document.getElementById(id);
-let i = 0, answers = [], name = "", payload = null;
-
-$("name").addEventListener("input", e => $("go").disabled = !e.target.value.trim());
-$("name").addEventListener("keydown", e => { if (e.key === "Enter" && !$("go").disabled) $("go").click(); });
-$("go").onclick = () => { name = $("name").value.trim(); i = 0; answers = []; show("quiz"); render(); };
-$("next").onclick = () => { i++; i < Q.length ? render() : finish(); };
-$("again").onclick = () => { $("name").value = name; show("start"); };
-$("retry").onclick = () => send();
-
-function show(id){ ["start","quiz","result"].forEach(s => $(s).classList.toggle("hide", s !== id)); }
-
-function render(){
-  const q = Q[i];
-  $("meta").textContent = `Question ${i+1} of ${Q.length}`;
-  $("prog").style.width = (i / Q.length * 100) + "%";
-  $("qtext").textContent = q.q;
-  $("fb").textContent = "";
-  $("next").disabled = true;
-  $("next").textContent = i === Q.length - 1 ? "See results" : "Next";
-  const box = $("opts"); box.innerHTML = "";
-  q.o.forEach((t, k) => {
-    const b = document.createElement("button");
-    b.className = "opt";
-    b.innerHTML = `<b>${L[k]}.</b><span></span>`;
-    b.lastChild.textContent = t;
-    b.onclick = () => pick(k);
-    box.appendChild(b);
-  });
-}
-
-function pick(k){
-  const q = Q[i]; answers[i] = k;
-  [...$("opts").children].forEach((b, n) => {
-    b.disabled = true;
-    if (n === q.a) b.classList.add("ok");
-    else if (n === k) b.classList.add("bad");
-  });
-  $("fb").textContent = k === q.a ? "Correct." : `Incorrect. Correct answer: ${L[q.a]}.`;
-  $("next").disabled = false;
-  $("next").focus();
-}
-
-function finish(){
-  const score = answers.filter((a, n) => a === Q[n].a).length;
-  const pct = Math.round(score / Q.length * 100);
-  $("prog").style.width = "100%";
-  $("who").textContent = name;
-  $("score").textContent = `${score} / ${Q.length}`;
-  $("pct").textContent = `${pct}%`;
-  const rev = $("review"); rev.innerHTML = "";
-  Q.forEach((q, n) => {
-    const d = document.createElement("div"); d.className = "rev";
-    const right = answers[n] === q.a;
-    d.innerHTML = `<div class="t"></div><div></div>`;
-    d.firstChild.textContent = `${n+1}. ${right ? "Correct" : "Incorrect"}`;
-    d.firstChild.style.color = right ? "var(--ok)" : "var(--bad)";
-    d.lastChild.textContent = right
-      ? `Your answer: ${L[answers[n]]}`
-      : `Your answer: ${L[answers[n]]}. Correct: ${L[q.a]}. ${q.o[q.a]}`;
-    rev.appendChild(d);
-  });
-  payload = {
-    username: "TALA Quiz",
-    embeds: [{
-      title: "TALA Mock Defense Quiz Result",
-      color: pct >= 70 ? 0x17794a : 0xb3261e,
-      fields: [
-        {name: "Name", value: name, inline: true},
-        {name: "Score", value: `${score}/${Q.length} (${pct}%)`, inline: true},
-        {name: "Answers", value: Q.map((q, n) => `${n+1}. ${L[answers[n]]} ${answers[n] === q.a ? "✅" : "❌ (correct: " + L[q.a] + ")"}`).join("\n")}
-      ],
-      timestamp: new Date().toISOString()
-    }]
-  };
-  show("result");
-  send();
-}
-
-async function send(){
-  const s = $("sendStatus"), r = $("retry");
-  r.classList.add("hide");
-  s.className = "status wait"; s.textContent = "Sending results...";
-  if (!WEBHOOK_URL) {
-    s.className = "status bad";
-    s.textContent = "No webhook set. Add your Discord webhook URL to WEBHOOK_URL in the file.";
-    return;
-  }
-  try {
-    const res = await fetch(WEBHOOK_URL, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    s.className = "status ok"; s.textContent = "Results sent.";
-  } catch (e) {
-    s.className = "status bad"; s.textContent = "Could not send results (" + e.message + ").";
-    r.classList.remove("hide");
-  }
-}
-</script>
 </body>
 </html>
